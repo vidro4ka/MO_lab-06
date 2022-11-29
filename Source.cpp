@@ -18,9 +18,9 @@ int nakop = 1;
 
 void printer(std::vector<std::vector<double>>& matr, const std::vector<std::string>& basis,
 	const std::vector<std::string>& free) {
-	std::cout << "\n\n\t ";
+	std::cout << "\n\n\t   ";
 	for (size_t i = 0; i < free.size(); ++i) {
-		std::cout << free[i] << "	 ";
+		std::cout << free[i] << "		   ";
 	}
 	std::cout << "\n";
 	for (size_t i = 0; i < basis.size(); ++i) {
@@ -29,7 +29,7 @@ void printer(std::vector<std::vector<double>>& matr, const std::vector<std::stri
 			if (matr[i][j] == -0) {
 				matr[i][j] = 0;
 			}
-			std::cout << std::setw(6) << std::fixed << std::setprecision(3) << round(matr[i][j] * 1000) / 1000 << std::right << "\t";
+			std::cout << std::setw(8) << std::fixed << std::setprecision(3) << round(matr[i][j] * 1000) / 1000 << std::right << "\t";
 		}
 		std::cout << "\n";
 	}
@@ -95,18 +95,14 @@ void searher(std::vector<std::vector<double>>& matr, std::vector<std::string>& f
 			for (size_t j = 1; j < matr[i].size(); ++j) {
 				if (matr[i][j] < 0) {
 					index_r_column = j;
-					//size_t index_r_raw = find_row(matr, index_r_column);
-					
 					transformation(matr, index_r_raw, index_r_column);
 					std::swap(free[index_r_column], basis[index_r_raw]);
-					
 					otr = true;
 					break;
 				}
 			}
 			if (otr) {
 				printer(matr, basis, free);
-				std::cout << "\n ITERATION\n";
 				i = 0;
 			}
 			else {
@@ -114,50 +110,6 @@ void searher(std::vector<std::vector<double>>& matr, std::vector<std::string>& f
 			}
 		}
 	}
-}
-
-void method(std::vector<std::vector<double>>& matr, std::vector<std::string>& free,
-	std::vector<std::string>& basis, std::string rezult) {
-
-	if (rezult == "min") {
-		for (auto& el : matr[matr.size() - 1]) {
-			el = -el;
-		}
-	}
-
-	std::map<std::string, double> m_result;
-
-	for (size_t i = 1; i < free.size(); ++i) {
-		m_result[free[i]] = 0;
-	}
-
-	printer(matr, basis, free);
-	searher(matr, free, basis);
-
-	int index_r_column = find_column(matr[matr.size() - 1]);
-
-	while (index_r_column != -1) {
-		int index_r_row = find_row(matr, index_r_column);
-		if (index_r_row == -1) {
-			std::cout << R"(Infinity number of sollution \(-_-)/)";
-			break;
-		}
-		std::swap(basis[index_r_row], free[index_r_column]);
-		transformation(matr, index_r_row, index_r_column);
-		printer(matr, basis, free);
-		index_r_column = find_column(matr[matr.size() - 1]);
-	}
-	std::cout << "Answer: " << std::endl;
-	for (size_t i = 0; i < basis.size() - 1; ++i) {
-		m_result.at(free[i]) = matr[i][0];
-	}
-	for (const auto& el : m_result) {
-		std::cout << el.first << " = " << el.second << std::endl;
-	}
-	if (rezult == "max") {
-		matr[matr.size() - 1][0] *= -1;
-	}
-	std::cout << "F = " << matr[matr.size() - 1][0] << std::endl;
 }
 
 class Simplex_tabels {
@@ -202,7 +154,7 @@ public:
 			int index_r_row = find_row(matr, index_r_column);
 
 			if (index_r_row == -1) {
-				throw std::logic_error("Infinity number of sollution 204 (-_-)/");
+				throw std::logic_error(R"(Infinity number of sollution \(-_-)/)");
 			}
 
 			std::swap(basis[index_r_row], free[index_r_column]);
@@ -227,7 +179,36 @@ public:
 		if (rezult == "min") {
 			promezutochniy_result_func *= -1;
 		}
-		std::cout << "F  = " << promezutochniy_result_func << std::endl;
+		if (rezult == "max") {
+			std::cout << "W  = " << promezutochniy_result_func << std::endl;
+			double g = 0;
+			size_t i = 1;
+			double sum = 0;
+			g = 1 / promezutochniy_result_func;
+			std::cout << "\ng  = " << g << std::endl;
+			std::cout << "\nOptimal strategy for player 'A' is: \n";
+			for (const auto& el : m_result) {
+				std::cout << "x" << i << " = " << el.second * g << std::endl;
+				sum += el.second * g;
+				++i;
+			}
+			std::cout << "\nChecking: " << sum << " = 1.000";
+		}
+		if (rezult == "min") {
+			std::cout << "Z  = " << promezutochniy_result_func << std::endl;
+			double h = 0;
+			size_t i = 1;
+			double sum = 0;
+			h = 1 / promezutochniy_result_func;
+			std::cout << "\nh  = " << h << std::endl;
+			std::cout << "\nOptimal strategy for player 'B' is: \n";
+			for (const auto& el : m_result) {
+				std::cout << "y" << i << " = " << el.second * h << std::endl;
+				sum += el.second * h;
+				++i;
+			}
+			std::cout << "\nChecking: " << sum << " = 1.000";
+		}
 	}
 
 	Simplex_tabels& operator=(const Simplex_tabels& ob) {
@@ -243,48 +224,107 @@ public:
 
 
 int main() {
-	bool dual = true;
-	if (dual) {
-		std::vector<std::vector<double>> matr = {
-	   {1, 1, 3, 9, 6},
-	   {1, 2, 6, 2, 3},
-	   {1, 7, 2, 6, 5},
-	   {0, -1, -1, -1, -1}
-		};
-		std::vector<std::string> free = { "sv", "x1", "x2", "x3" , "x4"};
-		std::vector<std::string> basis = { "x5", "x6", "x7", "F" };
-		std::string rezult = "min";
 
-		Simplex_tabels ob(basis, free, matr, rezult);
-		try {
-			ob.Simpl_method();
-		}
-		catch (std::exception& error) {
-			std::cout << std::endl << error.what() << std::endl;
-			return 0;
+	std::vector<std::vector<double>> usl = {
+	{8, 1, 17, 8, 1},
+	{12, 6, 11, 10, 16},
+	{4, 19, 11, 15, 2},
+	{17, 19, 6, 17, 16}
+	};
+
+	std::cout << "Optimal strategy for 'A' player:\n";
+
+	std::vector<std::vector<double>> A_for_a_player(usl[0].size());
+
+	for (size_t i = 0; i < A_for_a_player.size(); ++i) {
+		A_for_a_player[i].resize(usl.size());
+		for (size_t j = 0; j < A_for_a_player[i].size(); ++j) {
+			A_for_a_player[i][j] = (-1) * usl[j][i];
 		}
 	}
-	else {
-		std::vector<std::vector<double>> matr = {
-		{-1, -1, -2, -7},
-		{-1, -3, -6, -2},
-		{-1, -9, -2, -6},
-		{-1, -6, -3, -5},
-		{0, -1, -1, -1}
-		};
-		std::vector<std::string> free = { "sv", "x1", "x2", "x3" };
-		std::vector<std::string> basis = { "x4", "x5", "x6", "x7", "F" };
-		std::string rezult = "max";
-	
 
-		Simplex_tabels ob(basis, free, matr, rezult);
-		try {
-			ob.Simpl_method();
+	for (size_t i = 0; i < A_for_a_player.size(); ++i) {
+		A_for_a_player[i].insert(A_for_a_player[i].end(), -1);
+	}
+
+	std::vector<double> row1(A_for_a_player[0].size());
+
+	for (size_t i = 0; i < row1.size(); ++i) {
+		row1[i] = -1;
+	}
+
+	A_for_a_player.push_back(row1);
+
+	for (size_t i = 0; i < A_for_a_player.size(); ++i) {
+		std::swap(A_for_a_player[i][0], A_for_a_player[i][A_for_a_player.size() - 2]);
+		std::swap(A_for_a_player[i][1], A_for_a_player[i][A_for_a_player.size() - 2]);
+		std::swap(A_for_a_player[i][2], A_for_a_player[i][A_for_a_player.size() - 2]);
+		std::swap(A_for_a_player[i][3], A_for_a_player[i][A_for_a_player.size() - 2]);
+	}
+
+	A_for_a_player[A_for_a_player.size() - 1][0] = 0;
+
+	std::vector<std::string> free = { "sv", "u1", "u2", "u3" , "u4" };
+	std::vector<std::string> basis = { "u5", "u6", "u7", "u8", "u9", "W" };
+	std::string rezult = "max";
+
+
+	Simplex_tabels ob(basis, free, A_for_a_player, rezult);
+
+	try {
+		ob.Simpl_method();
+	}
+	catch (std::exception& error) {
+		std::cout << std::endl << error.what() << std::endl;
+		return 0;
+	}
+
+
+	std::cout << "\n\nOptimal strategy for 'B' player:\n";
+
+	std::vector<std::vector<double>>  A_for_b_player(usl.size());
+
+	for (size_t i = 0; i < A_for_b_player.size(); ++i) {
+		A_for_b_player[i].resize(usl[i].size());
+		for (size_t j = 0; j < A_for_b_player[i].size(); ++j) {
+			A_for_b_player[i][j] = usl[i][j];
 		}
-		catch (std::exception& error) {
-			std::cout << std::endl << error.what() << std::endl;
-			return 0;
-		}
+	}
+
+	for (size_t i = 0; i < A_for_b_player.size(); ++i) {
+		A_for_b_player[i].insert(A_for_b_player[i].end(), 1);
+	}
+
+	std::vector<double> row(A_for_b_player[0].size());
+
+	for (size_t i = 0; i < row.size(); ++i) {
+		row[i] = -1;
+	}
+
+	A_for_b_player.push_back(row);
+
+	for (size_t i = 0; i < A_for_b_player.size(); ++i) {
+		std::swap(A_for_b_player[i][0], A_for_b_player[i][A_for_b_player.size()]);
+		std::swap(A_for_b_player[i][1], A_for_b_player[i][A_for_b_player.size()]);
+		std::swap(A_for_b_player[i][2], A_for_b_player[i][A_for_b_player.size()]);
+		std::swap(A_for_b_player[i][3], A_for_b_player[i][A_for_b_player.size()]);
+		std::swap(A_for_b_player[i][4], A_for_b_player[i][A_for_b_player.size()]);
+	}
+
+	A_for_b_player[A_for_b_player.size() - 1][0] = 0;
+
+	std::vector<std::string> freeb = { "sv", "v1", "v2", "v3" , "v4", "v5" };
+	std::vector<std::string> basisb = { "v6", "v7", "v8", "v9", "Z" };
+	std::string rezultb = "min";
+
+	Simplex_tabels obb(basisb, freeb, A_for_b_player, rezultb);
+
+	try {
+		obb.Simpl_method();
+	}
+	catch (std::exception& error) {
+		std::cout << std::endl << error.what() << std::endl;
+		return 0;
 	}
 	return 0;
 }
