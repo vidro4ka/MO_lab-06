@@ -243,25 +243,48 @@ public:
 
 
 int main() {
-	std::vector<std::vector<double>> matr = {
+	bool dual = true;
+	if (dual) {
+		std::vector<std::vector<double>> matr = {
+	   {1, 1, 3, 9, 6},
+	   {1, 2, 6, 2, 3},
+	   {1, 7, 2, 6, 5},
+	   {0, -1, -1, -1, -1}
+		};
+		std::vector<std::string> free = { "sv", "x1", "x2", "x3" , "x4"};
+		std::vector<std::string> basis = { "x5", "x6", "x7", "F" };
+		std::string rezult = "min";
+
+		Simplex_tabels ob(basis, free, matr, rezult);
+		try {
+			ob.Simpl_method();
+		}
+		catch (std::exception& error) {
+			std::cout << std::endl << error.what() << std::endl;
+			return 0;
+		}
+	}
+	else {
+		std::vector<std::vector<double>> matr = {
 		{-1, -1, -2, -7},
 		{-1, -3, -6, -2},
 		{-1, -9, -2, -6},
 		{-1, -6, -3, -5},
 		{0, -1, -1, -1}
-	};
-	std::vector<std::string> free = { "sv", "x1", "x2", "x3" };
-	std::vector<std::string> basis = { "x4", "x5", "x6", "x7", "F"};
-	std::string rezult = "max";
+		};
+		std::vector<std::string> free = { "sv", "x1", "x2", "x3" };
+		std::vector<std::string> basis = { "x4", "x5", "x6", "x7", "F" };
+		std::string rezult = "max";
+	
 
-	Simplex_tabels ob(basis, free, matr, rezult);
-
-	try {
-		ob.Simpl_method();
-	}
-	catch (std::exception& error) {
-		std::cout << std::endl << error.what() << std::endl;
-		return 0;
+		Simplex_tabels ob(basis, free, matr, rezult);
+		try {
+			ob.Simpl_method();
+		}
+		catch (std::exception& error) {
+			std::cout << std::endl << error.what() << std::endl;
+			return 0;
+		}
 	}
 	return 0;
 }
